@@ -1,0 +1,36 @@
+# Cache and runtime files
+Code/*
+!Code/User/
+Code/User/*
+!Code/User/settings.json
+!Code/User/keybindings.json
+!Code/User/snippets/
+
+pulse/
+dconf/
+libreoffice/
+enchant/
+evolution/
+goa-1.0/
+gnome-session/
+tiling-assistant/
+totem/
+update-notifier/
+shotwell/
+matplotlib/
+nautilus/
+freerdp/
+ibus/
+opencode/
+
+# System-generated / Runtime
+*.log
+*.lock
+*.dat
+*-journal
+cookie
+gnome-initial-setup-done
+
+# Ignore nested git repos in awesome if you want to manage them separately
+# awesome/awesome-buttons/
+# awesome/awesome-wm-widgets/

@@ -1,0 +1,49 @@
+{
+  "workbench.colorTheme": "Night Owl",
+  "editor.inlineSuggest.enabled": true,
+  "security.workspace.trust.untrustedFiles": "open",
+  "editor.accessibilitySupport": "off",
+  "git.autofetch": true,
+  "go.toolsManagement.autoUpdate": true,
+  "haskell.manageHLS": "GHCup",
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "yaml": false,
+    "haskell": false,
+    "java": true,
+    "c": false
+  },
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "easycode-canary.userEmail": "artemiy.brukhno@gmail.com",
+  "C_Cpp.default.compilerPath": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+  "explorer.confirmDragAndDrop": false,
+  "npm.keybindingsChangedWarningShown": true,
+  "remote.SSH.remotePlatform": {
+    "remote-49.dcs.warwick.ac.uk": "linux",
+    "dcs": "linux"
+  },
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "terminal.integrated.stickyScroll.enabled": true,
+  "editor.stickyScroll.enabled": true,
+  "editor.formatOnSave": true,
+  "tabnine.experimentalAutoImports": true,
+  "git.confirmSync": false,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prisma.showPrismaDataPlatformNotification": false,
+  "github.copilot.editor.enableAutoCompletions": true,
+  "editor.fontSize": 12,
+  "debug.console.fontSize": 12,
+  "terminal.integrated.fontSize": 12,
+  "chat.editor.fontSize": 12,
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1"
+}
