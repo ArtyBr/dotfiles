@@ -1,4 +1,5 @@
-local gshape = Gears.shape
+local gears = require("gears")
+local gshape = gears.shape
 local _module = {}
 function _module.rrect(radius)
 	return function(cr, width, height)

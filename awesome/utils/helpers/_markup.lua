@@ -1,3 +1,5 @@
+local gears = require("gears")
+local beautiful = require("beautiful")
 local module = {}
 
 -- Since some escaping needs to be undone, we have to escape the escaped <>.
@@ -18,7 +20,7 @@ end
 -- removing invalid content. If invalid content is present, nothing is
 -- displayed.
 function module.escape_text(text)
-	text = Gears.string.xml_unescape(text)
+	text = gears.string.xml_unescape(text)
 	-- Take care of the already escaped content.
 	for pattern, subs in pairs(pre_escape) do
 		text = text:gsub(pattern, subs)
@@ -46,7 +48,7 @@ end
 
 function module.set_markup(wdg, text, fg, font)
 	local ret = module.escape_text(text or "")
-	wdg:set_font(font or Beautiful.font)
+	wdg:set_font(font or beautiful.font)
 
 	if fg then
 		ret = "<span color='" .. fg .. "'>" .. ret .. "</span>"

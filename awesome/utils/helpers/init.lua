@@ -1,5 +1,9 @@
 local _module = {}
 local cairo = require("lgi").cairo
+local gears = require("gears")
+local awful = require("awful")
+local beautiful = require("beautiful")
+local naughty = require("naughty")
 
 _module.addTables = function(a, b)
 	local result = {}
@@ -42,7 +46,7 @@ function _module.writeFile(filename, contents)
 end
 
 function _module.cropSurface(ratio, surf)
-	local old_w, old_h = Gears.surface.get_size(surf)
+	local old_w, old_h = gears.surface.get_size(surf)
 	local old_ratio = old_w / old_h
 	if old_ratio == ratio then
 		return surf
@@ -70,10 +74,11 @@ function _module.cropSurface(ratio, surf)
 end
 
 function _module.recolor_image(image, color)
-	return Gears.color.recolor_image(image, color)
+	return gears.color.recolor_image(image, color)
 end
 
 function _module.getCmdOut(cmd)
+	-- NOTE: This is a BLOCKING call, AwesomeWM will hang until it returns.
 	local handle = assert(io.popen(cmd, "r"))
 	local output = assert(handle:read("*a"))
 	handle:close()
@@ -90,9 +95,9 @@ function _module.notify_dwim(args, notif)
 		notif:set_image(args.image or notif.image)
 		notif.actions = args.actions or notif.actions
 		notif.app_name = args.app_name or notif.app_name
-		notif:set_timeout(Naughty.config.defaults.timeout)
+		notif:set_timeout(naughty.config.defaults.timeout)
 	else
-		n = Naughty.notification(args)
+		n = naughty.notification(args)
 	end
 	return n
 end
@@ -102,11 +107,11 @@ function _module.gc(widget, id)
 end
 
 function _module.placement(wdg, pos, props, margins)
-	props = props or { honor_workarea = true, margins = margins or Beautiful.useless_gap }
-	if Awful.placement[pos] then
-		Awful.placement[pos](wdg, props)
+	props = props or { honor_workarea = true, margins = margins or beautiful.useless_gap }
+	if awful.placement[pos] then
+		awful.placement[pos](wdg, props)
 	else
-		Awful.placement.centered(wdg, props)
+		awful.placement.centered(wdg, props)
 	end
 end
 

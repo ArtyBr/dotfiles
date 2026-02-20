@@ -3,13 +3,12 @@ local wibox = require("wibox")
 local watch = require("awful.widget.watch")
 local gears = require("gears")
 local beautiful = require("beautiful")
-beautiful.init(gears.filesystem.get_configuration_dir() .. "mytheme.lua")
 local dpi = beautiful.xresources.apply_dpi
 
 local percentage = wibox.widget.textbox()
 percentage.font = beautiful.widget_text
 local battery_icon = wibox.widget.textbox()
-battery_icon.font = beautiful.widget_icon
+battery_icon.font = beautiful.widget_icon_battery or beautiful.widget_icon
 
 local icons = {
 	[0] = "", -- <= 10%

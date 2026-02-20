@@ -1,8 +1,6 @@
 -- Required libraries
 local wibox = require("wibox")
-local gears = require("gears")
 local beautiful = require("beautiful")
-beautiful.init(gears.filesystem.get_configuration_dir() .. "mytheme.lua")
 local dpi = beautiful.xresources.apply_dpi
 
 local clock = wibox.widget.textclock("<span> %H:%M </span>")

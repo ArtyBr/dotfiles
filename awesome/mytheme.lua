@@ -8,7 +8,7 @@ local xresources = require("beautiful.xresources")
 local dpi = xresources.apply_dpi
 
 local gfs = require("gears.filesystem")
-local themes_path = awful.util.getdir("config") .. "/themes/"
+local themes_path = gfs.get_configuration_dir() .. "/themes/"
 local theme = {}
 
 theme.wallpaper = themes_path .. "default/wallpaper_2.png"

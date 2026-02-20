@@ -7,7 +7,7 @@ local xresources = require("beautiful.xresources")
 local dpi = xresources.apply_dpi
 ------------------------------------
 
-local get_taglist = function(s)
+local get_taglist = function(s, modkey)
 	-- Taglist buttons
 	local taglist_buttons = gears.table.join(
 		awful.button({}, 1, function(t)

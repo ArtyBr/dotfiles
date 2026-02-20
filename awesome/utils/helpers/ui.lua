@@ -1,17 +1,21 @@
+local wibox = require("wibox")
+local beautiful = require("beautiful")
+local awful = require("awful")
+local color_helpers = require("utils.helpers.color")
 local _module = {}
 local capi = { mouse = mouse }
 
 function _module.horizontal_pad(width)
-	return Wibox.widget({
+	return wibox.widget({
 		forced_width = width,
-		layout = Wibox.layout.fixed.horizontal,
+		layout = wibox.layout.fixed.horizontal,
 	})
 end
 
 function _module.vertical_pad(height)
-	return Wibox.widget({
+	return wibox.widget({
 		forced_height = height,
-		layout = Wibox.layout.fixed.vertical,
+		layout = wibox.layout.fixed.vertical,
 	})
 end
 
@@ -35,11 +39,11 @@ end
 
 function _module.add_hover(element, bg, fg, hbg, hfg)
 	-- _module.add_cursor_hover(element)
-	local nbg = bg or Beautiful.accent_color
-	local nfg = fg or Helpers.color.isDark(nbg) and Beautiful.white or Beautiful.black
+	local nbg = bg or beautiful.accent_color
+	local nfg = fg or color_helpers.isDark(nbg) and beautiful.white or beautiful.black
 	element.bg = nbg
 	element.fg = nfg
-	hbg = hbg or Helpers.color.lightness(nbg, 15)
+	hbg = hbg or color_helpers.lightness(nbg, 15)
 	hfg = hfg or nfg
 	element:connect_signal("mouse::enter", function(self)
 		self.bg = hbg
@@ -52,7 +56,7 @@ function _module.add_hover(element, bg, fg, hbg, hfg)
 end
 
 function _module.add_click(element, mouse, action)
-	element:add_button(Awful.button({}, mouse, action))
+	element:add_button(awful.button({}, mouse, action))
 end
 
 function _module.add_hover_action(element, enter_fn, leave_fn)

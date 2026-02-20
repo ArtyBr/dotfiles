@@ -98,8 +98,7 @@ local function worker(args)
 	local connected = false
 
 	-- Settings
-	local ICON_DIR = awful.util.getdir("config") .. "/" .. module_path .. "/net_widgets/icons/"
-	local interface = "wlp0s20f3"
+	local interface = args.interface or "wlp0s20f3"
 	local timeout = args.timeout or 5
 	local font = args.font or beautiful.font
 	local popup_signal = args.popup_signal or false
@@ -119,7 +118,7 @@ local function worker(args)
         "iw dev " .. interface .. " link",
         function(stdout, stderr, reason, exit_code)
             -- Parse the iw output to extract signal level
-            local parsed_signal = 0
+            local parsed_signal = nil
             for line in stdout:gmatch("[^\r\n]+") do
                 local match = string.match(line, "signal:%s+([%-0-9]+)%s+dBm")
                 if match then
@@ -131,7 +130,7 @@ local function worker(args)
             -- Convert dBm to percentage (approximate conversion)
             -- dBm ranges from -100 (weak) to -30 (strong)
             if parsed_signal then
-                signal_level = math.max(0, math.min(100, (parsed_signal + 100) * 100 / 70))
+                signal_level = math.floor(math.max(0, math.min(100, (parsed_signal + 100) * 100 / 70)))
             else
                 signal_level = nil
             end
@@ -252,7 +251,7 @@ local function worker(args)
 			preset = fs_notification_preset,
 			text = text_grabber(),
 			timeout = t_out,
-			screen = mouse.screen,
+			screen = awful.screen.focused(),
 			position = popup_position,
 		})
 	end
@@ -264,8 +263,8 @@ function wireless:attach(widget, args)
 	local onclick = args.onclick
 	-- Bind onclick event function
 	if onclick then
-		widget:buttons(awful.util.table.join(awful.button({}, 1, function()
-			awful.util.spawn(onclick)
+		widget:buttons(gears.table.join(awful.button({}, 1, function()
+			awful.spawn(onclick)
 		end)))
 	end
 	widget:connect_signal("mouse::enter", function()
