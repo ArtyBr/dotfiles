@@ -243,8 +243,8 @@ awful.keyboard.append_global_keybindings({
 		awful.spawn(terminal)
 	end, { description = "open a terminal", group = "launcher" }),
 	awful.key({ modkey }, "b", function()
-		awful.spawn("firefox")
-	end, { description = "launch firefox", group = "launcher" }),
+		awful.spawn("flatpak run app.zen_browser.zen")
+	end, { description = "launch zen browser", group = "launcher" }),
 	awful.key({ modkey }, "r", function()
 		awful.spawn.with_shell("~/.config/rofi/launchers/type-1/launcher.sh")
 	end, { description = "run prompt", group = "launcher" }),
@@ -327,6 +327,12 @@ awful.keyboard.append_global_keybindings({
 	awful.key({ modkey }, "h", function()
 		awful.tag.incmwfact(-0.05)
 	end, { description = "decrease master width factor", group = "layout" }),
+	awful.key({ modkey, "Mod1" }, "j", function()
+		awful.client.incwfact(0.05)
+	end, { description = "increase client height factor", group = "layout" }),
+	awful.key({ modkey, "Mod1" }, "k", function()
+		awful.client.incwfact(-0.05)
+	end, { description = "decrease client height factor", group = "layout" }),
 	awful.key({ modkey, "Shift" }, "h", function()
 		awful.tag.incnmaster(1, nil, true)
 	end, { description = "increase the number of master clients", group = "layout" }),
