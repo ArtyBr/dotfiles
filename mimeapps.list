@@ -1,2 +1,5 @@
 [Added Associations]
 application/pdf=firefox_firefox.desktop;
+
+[Default Applications]
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop

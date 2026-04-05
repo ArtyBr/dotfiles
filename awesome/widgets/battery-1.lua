@@ -65,7 +65,7 @@ local function update_widget(stdout)
 	local time_remaining = nil
 
 	for s in stdout:gmatch("[^\r\n]+") do
-		local status, charge_str, time = string.match(s, ".+: (%a+), (%d?%d?%d)%%,?%s*(.-)$")
+		local status, charge_str, time = string.match(s, ".+: ([%a ]-), (%d?%d?%d)%%,?%s*(.-)$")
 		if status ~= nil then
 			table.insert(battery_info, {
 				status = status,
@@ -110,6 +110,9 @@ local function update_widget(stdout)
 	elseif status == "Full" then
 		battery_icon.text = ""
 		tooltip_text = "Battery is full"
+	elseif status == "Not charging" then
+		battery_icon.text = icons[math.floor(charge / 10) * 10]
+		tooltip_text = "Not charging (plugged in): " .. math.floor(charge) .. "%"
 	else
 		battery_icon.text = icons[math.floor(charge / 10) * 10]
 		tooltip_text = "Battery: " .. math.floor(charge) .. "%"
