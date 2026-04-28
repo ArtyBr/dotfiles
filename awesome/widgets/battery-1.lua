@@ -63,6 +63,7 @@ local function update_widget(stdout)
 	local battery_info = {}
 	local capacities = {}
 	local time_remaining = nil
+	local wattage = 0
 
 	for s in stdout:gmatch("[^\r\n]+") do
 		local status, charge_str, time = string.match(s, ".+: ([%a ]-), (%d?%d?%d)%%,?%s*(.-)$")
@@ -77,8 +78,15 @@ local function update_widget(stdout)
 			end
 		else
 			local cap_str = string.match(s, ".+:.+last full capacity (%d+)")
-
-			table.insert(capacities, tonumber(cap_str))
+			if cap_str then
+				table.insert(capacities, tonumber(cap_str))
+			else
+				-- Parse wattage if it's a raw number from cat /sys/class/power_supply/BAT*/power_now
+				local w = tonumber(s)
+				if w then
+					wattage = wattage + w
+				end
+			end
 		end
 	end
 
@@ -94,18 +102,21 @@ local function update_widget(stdout)
 			status = batt.status
 		end
 
-		charge = charge + batt.charge * capacities[i]
+		charge = charge + batt.charge * (capacities[i] or 0)
 	end
-	charge = charge / capacity
+	charge = (capacity > 0) and (charge / capacity) or 0
 
-	percentage.text = math.floor(charge) .. "%"
-
+	local display_text = math.floor(charge) .. "%"
 	local tooltip_text = ""
+
 	if status == "Charging" then
 		battery_icon.text = " "
 		tooltip_text = "Charging: " .. math.floor(charge) .. "%"
+		if wattage > 0 then
+			tooltip_text = tooltip_text .. "\nPower: " .. string.format("%.1fW", wattage / 1000000)
+		end
 		if time_remaining then
-			tooltip_text = tooltip_text .. "\n" .. time_remaining
+			tooltip_text = tooltip_text .. "\nTime: " .. time_remaining
 		end
 	elseif status == "Full" then
 		battery_icon.text = ""
@@ -123,12 +134,13 @@ local function update_widget(stdout)
 		end
 	end
 
+	percentage.text = display_text
 	battery_tooltip:set_text(tooltip_text)
 
 	collectgarbage("collect")
 end
 
-watch("acpi -i", 10, function(widget, stdout)
+watch([[bash -c "acpi -i; cat /sys/class/power_supply/BAT*/power_now"]], 10, function(widget, stdout)
 	update_widget(stdout)
 end, battery_widget)
 
