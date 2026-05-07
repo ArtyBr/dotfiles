@@ -1,4 +1,5 @@
 -- Required libraries
+local awful = require("awful")
 local wibox = require("wibox")
 local watch = require("awful.widget.watch")
 local gears = require("gears")
@@ -39,18 +40,69 @@ local battery_widget = wibox.widget({
 	layout = wibox.layout.fixed.horizontal,
 })
 
-local battery_tooltip = require("awful.tooltip")({
-	objects = { battery_widget },
-	mode = "outside",
-	align = "top",
-	delay_show = 0,
-	bg = beautiful.bg_normal,
-	fg = beautiful.fg_normal,
-	border_color = beautiful.bg_focus,
+local is_locked = false
+local popup = awful.popup({
+	ontop = true,
+	visible = false,
 	border_width = 1,
-	font = "JetBrains Nerd Font 11",
-	margins = dpi(8),
+	border_color = beautiful.bg_focus,
+	maximum_width = 400,
+	offset = { y = 5 },
+	widget = {}
 })
+
+local function dismiss_popup()
+	is_locked = false
+	popup.visible = false
+end
+
+client.connect_signal("button::press", dismiss_popup)
+awful.mouse.append_global_mousebinding(awful.button({}, 1, dismiss_popup))
+
+local tooltip_text = ""
+
+local function rebuild_popup()
+	popup:setup({
+		{
+			{
+				text = tooltip_text,
+				font = "JetBrains Nerd Font 11",
+				widget = wibox.widget.textbox,
+			},
+			margins = 10,
+			widget = wibox.container.margin,
+		},
+		bg = beautiful.bg_normal,
+		widget = wibox.container.background,
+	})
+	if not popup.visible then
+		popup.visible = true
+		popup:move_next_to(mouse.current_widget_geometry)
+	end
+end
+
+battery_widget:buttons(gears.table.join(
+	awful.button({}, 1, function()
+		if is_locked then
+			dismiss_popup()
+		else
+			is_locked = true
+			rebuild_popup()
+		end
+	end)
+))
+
+battery_widget:connect_signal("mouse::enter", function()
+	if not is_locked then
+		rebuild_popup()
+	end
+end)
+
+battery_widget:connect_signal("mouse::leave", function()
+	if not is_locked then
+		dismiss_popup()
+	end
+end)
 
 --- update_widget: Updates the battery widget with the current battery status and charge level.
 -- This function parses the output from the 'acpi -i' command to extract battery status, charge level, and time remaining.
@@ -107,35 +159,38 @@ local function update_widget(stdout)
 	charge = (capacity > 0) and (charge / capacity) or 0
 
 	local display_text = math.floor(charge) .. "%"
-	local tooltip_text = ""
+	local charge_text = ""
 
 	if status == "Charging" then
 		battery_icon.text = " "
-		tooltip_text = "Charging: " .. math.floor(charge) .. "%"
+		charge_text = "Charging: " .. math.floor(charge) .. "%"
 		if wattage > 0 then
-			tooltip_text = tooltip_text .. "\nPower: " .. string.format("%.1fW", wattage / 1000000)
+			charge_text = charge_text .. "\nPower: " .. string.format("%.1fW", wattage / 1000000)
 		end
 		if time_remaining then
-			tooltip_text = tooltip_text .. "\nTime: " .. time_remaining
+			charge_text = charge_text .. "\nTime: " .. time_remaining
 		end
 	elseif status == "Full" then
 		battery_icon.text = ""
-		tooltip_text = "Battery is full"
+		charge_text = "Battery is full"
 	elseif status == "Not charging" then
 		battery_icon.text = icons[math.floor(charge / 10) * 10]
-		tooltip_text = "Not charging (plugged in): " .. math.floor(charge) .. "%"
+		charge_text = "Not charging (plugged in): " .. math.floor(charge) .. "%"
 	else
 		battery_icon.text = icons[math.floor(charge / 10) * 10]
-		tooltip_text = "Battery: " .. math.floor(charge) .. "%"
+		charge_text = "Battery: " .. math.floor(charge) .. "%"
 		if time_remaining then
-			tooltip_text = tooltip_text .. "\n" .. time_remaining
+			charge_text = charge_text .. "\n" .. time_remaining
 		else
-			tooltip_text = tooltip_text .. "\nTime: Not available"
+			charge_text = charge_text .. "\nTime: Not available"
 		end
 	end
 
 	percentage.text = display_text
-	battery_tooltip:set_text(tooltip_text)
+	tooltip_text = charge_text
+	if popup.visible then
+		rebuild_popup()
+	end
 
 	collectgarbage("collect")
 end

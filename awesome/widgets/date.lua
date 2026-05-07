@@ -32,11 +32,11 @@ local month_calendar = awful.widget.calendar_popup.month({
 	long_weekdays = true,
 	margin = dpi(10),
 	border_color = beautiful.bg_focus,
-	style_month = { padding = dpi(10), border_width = dpi(1), bg_color = beautiful.black },
-	style_header = { border_width = 0, bg_color = beautiful.black },
-	style_weekday = { border_width = 0, bg_color = beautiful.black },
-	style_normal = { border_width = 0, bg_color = beautiful.black },
-	style_focus = { border_width = 0, bg_color = beautiful.black, fg_color = beautiful.bg_normal },
+	style_month = { padding = dpi(10), border_width = dpi(1), bg_color = beautiful.bg_normal },
+	style_header = { border_width = 0, bg_color = beautiful.bg_normal },
+	style_weekday = { border_width = 0, bg_color = beautiful.bg_normal },
+	style_normal = { border_width = 0, bg_color = beautiful.bg_normal },
+	style_focus = { border_width = 0, bg_color = beautiful.bg_focus, fg_color = beautiful.fg_focus },
 })
 
 month_calendar:attach(date, nil, {

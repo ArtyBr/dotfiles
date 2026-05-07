@@ -8,14 +8,6 @@ local module_path = (...):match("(.+/)[^/]+$") or ""
 
 local theme = beautiful.get()
 
-function dbg(message)
-	naughty.notify({
-		preset = naughty.config.presets.normal,
-		title = "debug",
-		text = message,
-	})
-end
-
 local function draw_signal(level)
 	-- draw 32x32 for simplicity, imagebox will resize it using loseless transform
 	local img = cairo.ImageSurface.create(cairo.Format.ARGB32, 32, 32)
@@ -154,16 +146,24 @@ local function worker(args)
 		return true
 	end)
 
-	widgets_table["imagebox"] = net_icon
-	widgets_table["textbox"] = net_text
-	if widget then
-		widget:add(net_icon)
-		-- Hide the text when we want to popup the signal instead
-		if not popup_signal then
-			widget:add(net_text)
-		end
-		wireless:attach(widget, { onclick = onclick })
+	local is_locked = false
+	local popup = awful.popup({
+		ontop = true,
+		visible = false,
+		border_width = 1,
+		border_color = beautiful.bg_focus,
+		maximum_width = 400,
+		offset = { y = 5 },
+		widget = {}
+	})
+
+	local function dismiss_popup()
+		is_locked = false
+		popup.visible = false
 	end
+
+	client.connect_signal("button::press", dismiss_popup)
+	awful.mouse.append_global_mousebinding(awful.button({}, 1, dismiss_popup))
 
 	local function text_grabber()
 		local msg = ""
@@ -174,7 +174,7 @@ local function worker(args)
 			local inet = "N/A"
 
 			-- Use iw/ip
-			f = io.popen("iw dev " .. interface .. " link")
+			local f = io.popen("iw dev " .. interface .. " link")
 			for line in f:lines() do
 				-- Connected to 00:01:8e:11:45:ac (on wlp1s0)
 				mac = string.match(line, "Connected to ([0-f:]+)") or mac
@@ -191,13 +191,13 @@ local function worker(args)
 			end
 			f:close()
 
-			signal = ""
+			local signal = ""
 			if popup_signal then
 				signal = "├Strength\t" .. signal_level .. "\n"
 			end
 
-			metrics_down = ""
-			metrics_up = ""
+			local metrics_down = ""
+			local metrics_up = ""
 			if popup_metrics then
 				local tdown = net_stats(interface, "d")
 				local tup = net_stats(interface, "u")
@@ -236,6 +236,26 @@ local function worker(args)
 		return msg
 	end
 
+	local function rebuild_popup()
+		popup:setup({
+			{
+				{
+					markup = text_grabber(),
+					font = font,
+					widget = wibox.widget.textbox,
+				},
+				margins = 10,
+				widget = wibox.container.margin,
+			},
+			bg = beautiful.bg_normal,
+			widget = wibox.container.background,
+		})
+		if not popup.visible then
+			popup.visible = true
+			popup:move_next_to(mouse.current_widget_geometry)
+		end
+	end
+
 	local notification = nil
 	function wireless:hide()
 		if notification ~= nil then
@@ -244,35 +264,41 @@ local function worker(args)
 		end
 	end
 
-	function wireless:show(t_out)
-		wireless:hide()
+	if widget then
+		widget:add(net_icon)
+		-- Hide the text when we want to popup the signal instead
+		if not popup_signal then
+			widget:add(net_text)
+		end
 
-		notification = naughty.notify({
-			preset = fs_notification_preset,
-			text = text_grabber(),
-			timeout = t_out,
-			screen = awful.screen.focused(),
-			position = popup_position,
-		})
+		widget:buttons(gears.table.join(
+			awful.button({}, 1, function()
+				if is_locked then
+					dismiss_popup()
+				else
+					is_locked = true
+					rebuild_popup()
+				end
+			end)
+		))
+
+		widget:connect_signal("mouse::enter", function()
+			if not is_locked then
+				rebuild_popup()
+			end
+		end)
+
+		widget:connect_signal("mouse::leave", function()
+			if not is_locked then
+				dismiss_popup()
+			end
+		end)
 	end
+
 	return widget or widgets_table
 end
 
 function wireless:attach(widget, args)
-	local args = args or {}
-	local onclick = args.onclick
-	-- Bind onclick event function
-	if onclick then
-		widget:buttons(gears.table.join(awful.button({}, 1, function()
-			awful.spawn(onclick)
-		end)))
-	end
-	widget:connect_signal("mouse::enter", function()
-		wireless:show(0)
-	end)
-	widget:connect_signal("mouse::leave", function()
-		wireless:hide()
-	end)
 	return widget
 end
 
