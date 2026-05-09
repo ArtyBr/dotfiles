@@ -8,38 +8,20 @@ local module_path = (...):match("(.+/)[^/]+$") or ""
 
 local theme = beautiful.get()
 
-local function draw_signal(level)
-	-- draw 32x32 for simplicity, imagebox will resize it using loseless transform
-	local img = cairo.ImageSurface.create(cairo.Format.ARGB32, 32, 32)
-	local cr = cairo.Context(img)
-	local cy = 44
-	local degree = 230
-	local rev_degree = degree + 80
-	cr:set_source(gears.color("#ffffff"))
-	if level > 75 then
-		cr:arc(32 / 2, cy / 2, 32 / 2, degree * math.pi / 180, rev_degree * math.pi / 180)
-		cr:arc_negative(32 / 2, cy / 2, 32 / 2 - 2, rev_degree * math.pi / 180, degree * math.pi / 180)
+local function get_signal_icon(level)
+	if level == nil or level == 0 then
+		return "󰤭 "
+	elseif level > 80 then
+		return "󰤨 "
+	elseif level > 60 then
+		return "󰤥 "
+	elseif level > 40 then
+		return "󰤢 "
+	elseif level > 20 then
+		return "󰤟 "
+	else
+		return "󰤯 "
 	end
-	if level > 50 then
-		cr:arc(32 / 2, cy / 2, 24 / 2, degree * math.pi / 180, rev_degree * math.pi / 180)
-		cr:arc_negative(32 / 2, cy / 2, 24 / 2 - 2, rev_degree * math.pi / 180, degree * math.pi / 180)
-	end
-	if level > 25 then
-		cr:arc(32 / 2, cy / 2, 16 / 2, degree * math.pi / 180, rev_degree * math.pi / 180)
-		cr:arc_negative(32 / 2, cy / 2, 16 / 2 - 2, rev_degree * math.pi / 180, degree * math.pi / 180)
-	end
-	cr:arc(32 / 2, (cy - 3) / 2, 4 / 2, 0, 2 * math.pi)
-	cr:arc_negative(32 / 2, (cy - 3) / 2, 4 / 2 - 2, 2 * math.pi, 0)
-	--cr:rectangle(32 / 2 - 1, 32 / 2 - 1, 2, 32 / 2 - 2)
-
-	if level == 0 then
-		cr:set_source(gears.color("#cf5050"))
-		gears.shape.transform(gears.shape.cross):rotate(45 * math.pi / 180):translate(12, -10)(cr, 10, 10, 3)
-	end
-
-	cr:close_path()
-	cr:fill()
-	return img
 end
 
 function net_stats(card, which)
@@ -100,45 +82,45 @@ local function worker(args)
 	local indent = args.indent or 3
 	local popup_metrics = args.popup_metrics or false
 
-	local net_icon = wibox.widget.imagebox(draw_signal(0))
+	local net_icon = wibox.widget.textbox()
+	net_icon.font = beautiful.widget_icon
+	net_icon:set_text(get_signal_icon(0))
+
 	local net_text = wibox.widget.textbox()
 	net_text.font = font
 	net_text:set_text(" N/A ")
 	local signal_level = 0
 	local function net_update()
-    awful.spawn.easy_async(
-        "iw dev " .. interface .. " link",
-        function(stdout, stderr, reason, exit_code)
-            -- Parse the iw output to extract signal level
-            local parsed_signal = nil
-            for line in stdout:gmatch("[^\r\n]+") do
-                local match = string.match(line, "signal:%s+([%-0-9]+)%s+dBm")
-                if match then
-                    parsed_signal = tonumber(match)
-                    break
-                end
-            end
-            
-            -- Convert dBm to percentage (approximate conversion)
-            -- dBm ranges from -100 (weak) to -30 (strong)
-            if parsed_signal then
-                signal_level = math.floor(math.max(0, math.min(100, (parsed_signal + 100) * 100 / 70)))
-            else
-                signal_level = nil
-            end
-            
-            if signal_level == nil then
-                connected = false
-                net_text:set_text(" N/A ")
-                net_icon:set_image(draw_signal(0))
-            else
-                connected = true
-                net_text:set_text(string.format("%" .. indent .. "d%%", signal_level))
-                net_icon:set_image(draw_signal(signal_level))
-            end
-        end
-    )
-  end
+		awful.spawn.easy_async("iw dev " .. interface .. " link", function(stdout, stderr, reason, exit_code)
+			-- Parse the iw output to extract signal level
+			local parsed_signal = nil
+			for line in stdout:gmatch("[^\r\n]+") do
+				local match = string.match(line, "signal:%s+([%-0-9]+)%s+dBm")
+				if match then
+					parsed_signal = tonumber(match)
+					break
+				end
+			end
+
+			-- Convert dBm to percentage (approximate conversion)
+			-- dBm ranges from -100 (weak) to -30 (strong)
+			if parsed_signal then
+				signal_level = math.floor(math.max(0, math.min(100, (parsed_signal + 100) * 100 / 70)))
+			else
+				signal_level = nil
+			end
+
+			if signal_level == nil then
+				connected = false
+				net_text:set_text(" N/A ")
+				net_icon:set_text(get_signal_icon(nil))
+			else
+				connected = true
+				net_text:set_text(string.format("%" .. indent .. "d%%", signal_level))
+				net_icon:set_text(get_signal_icon(signal_level))
+			end
+		end)
+	end
 
 	net_update()
 	local timer = gears.timer.start_new(timeout, function()

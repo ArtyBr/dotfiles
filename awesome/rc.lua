@@ -25,6 +25,8 @@ local date_widget = require("widgets.date")
 local volume_widget = require("awesome-wm-widgets.volume-widget.volume")
 local net_widgets = require("widgets.wireless")
 local cpu_widget = require("awesome-wm-widgets.cpu-widget.cpu-widget")
+local ram_widget = require("awesome-wm-widgets.ram-widget.ram-widget")
+local brightness_widget = require("awesome-wm-widgets.brightness-widget.brightness")
 local tasklist_widget = require("widgets.tasklist")
 
 -- Customization
@@ -182,10 +184,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				vert_sep,
 				-- s.mypromptbox,
 			},
-			{
-				layout = wibox.layout.fixed.horizontal,
-				s.mytasklist,
-			}, -- Middle widget
+			s.mytasklist, -- Middle widget
 			{ -- Right widgets
 				vert_sep,
 				layout = wibox.layout.fixed.horizontal,
@@ -196,11 +195,32 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				vert_sep,
 				battery_widget,
 				vert_sep,
-				volume_widget(),
+				brightness_widget({
+					program = "brightnessctl",
+					type = "icon_and_text",
+					percentage = true,
+					tooltip = true,
+				}),
+				vert_sep,
+				volume_widget({
+					widget_type = "icon_and_text",
+				}),
 				vert_sep,
 				net_widgets({ interface = net_interface, popup_signal = true }),
 				vert_sep,
-				cpu_widget(),
+				cpu_widget({
+					width = 70,
+					step_width = 2,
+					step_spacing = 0,
+					color = beautiful.fg_normal,
+				}),
+				ram_widget({
+					color_used = beautiful.fg_normal,
+					color_free = beautiful.bg_normal,
+					color_buf = "#44475a",
+					widget_width = 30,
+					widget_height = 30,
+				}),
 				vert_sep,
 			},
 		},
@@ -352,11 +372,10 @@ awful.keyboard.append_global_keybindings({
 		awful.layout.inc(-1)
 	end, { description = "select previous", group = "layout" }),
   -- Brightness
-
   awful.key({ }, "XF86MonBrightnessDown", function ()
-      awful.spawn("brightnessctl set 5%-") end),
+      brightness_widget:dec() end),
   awful.key({ }, "XF86MonBrightnessUp", function ()
-      awful.spawn("brightnessctl set 5%+") end),
+      brightness_widget:inc() end),
 })
 
 -- @DOC_NUMBER_KEYBINDINGS@

@@ -29,9 +29,9 @@ theme.fg_normal = "#aaaaaa"
 theme.fg_focus = "#ffffff"
 theme.fg_urgent = "#ffffff"
 theme.fg_minimize = "#ffffff"
-theme.fg_clock = theme.fg_focus
-theme.fg_date = theme.fg_clock
-theme.fg_battery = theme.fg_focus
+theme.fg_clock = theme.fg_normal
+theme.fg_date = theme.fg_normal
+theme.fg_battery = theme.fg_normal
 
 theme.useless_gap = dpi(2)
 theme.border_width = dpi(3)

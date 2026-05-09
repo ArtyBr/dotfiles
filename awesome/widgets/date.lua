@@ -36,7 +36,7 @@ local month_calendar = awful.widget.calendar_popup.month({
 	style_header = { border_width = 0, bg_color = beautiful.bg_normal },
 	style_weekday = { border_width = 0, bg_color = beautiful.bg_normal },
 	style_normal = { border_width = 0, bg_color = beautiful.bg_normal },
-	style_focus = { border_width = 0, bg_color = beautiful.bg_focus, fg_color = beautiful.fg_focus },
+	style_focus = { border_width = 0, bg_color = beautiful.bg_focus, fg_color = beautiful.fg_normal },
 })
 
 month_calendar:attach(date, nil, {
